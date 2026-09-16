@@ -2,41 +2,37 @@ import { useState, useEffect } from 'react';
 import GraphCard from './GraphCard';
 
 export default function App() {
-  // 1. Declare state for API data and loading status
-  const [livePercentage, setLivePercentage] = useState(80);
+  const [liveDataMap, setLiveDataMap] = useState({});
   const [apiConnected, setApiConnected] = useState(false);
 
-  // Fixed 18-hour skeleton generator
-  function normalizeHourlyData(actualPoints = []) {
-    const fullDayHours = [
-      '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', 
-      '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', 
-      '8 PM', '9 PM', '10 PM', '11 PM', '12 AM'
-    ];
+  const targetLocations = [
+    "Nick Level 1 Fitness",
+    "Nick Level 2 Fitness",
+    "Nick Level 3 Fitness",
+    "Nick Power House",
+    "Nick Track",
+    "Nick Courts 1 & 2",
+    "Nick Courts 3-6",
+    "Nick Courts 7 & 8",
+  ];
 
-    return fullDayHours.map(hour => {
-      const match = actualPoints.find(p => p.time === hour);
-      return {
-        time: hour,
-        count: match ? match.count : null
-      };
-    });
-  }
-
-  // 2. Fetch live data from FastAPI when component mounts
+  // Fetch live snapshot numbers for all locations
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/occupancy/live')
       .then((res) => {
         if (!res.ok) throw new Error('API network response failed');
         return res.json();
       })
-      .then((data) => {
-        console.log('Successfully fetched API data:', data);
+      .then((resData) => {
         setApiConnected(true);
-        
-        if (data.percentage) {
-          setLivePercentage(data.percentage);
+        // Build a lookup object: { "Nick Level 1 Fitness": 85, "Nick Power House": 61, ... }
+        const map = {};
+        if (resData.data) {
+          resData.data.forEach((item) => {
+            map[item.location_name] = item.percentage;
+          });
         }
+        setLiveDataMap(map);
       })
       .catch((error) => {
         console.error('Error connecting to FastAPI backend:', error);
@@ -44,34 +40,12 @@ export default function App() {
       });
   }, []);
 
-  // Existing mock time-series data structure
-  const nickLevel1Data = {
-    today: normalizeHourlyData([
-      { time: '6 AM', count: 10 },
-      { time: '7 AM', count: 20 },
-      { time: '8 AM', count: 35 },
-      { time: '9 AM', count: 50 },
-      { time: '10 AM', count: 65 },
-      { time: '11 AM', count: 75 },
-      { time: '12 PM', count: 85 },
-      { time: '1 PM', count: 80 },
-    ]),
-    mon: normalizeHourlyData([
-      { time: '6 AM', count: 15 },
-      { time: '8 AM', count: 40 },
-      { time: '12 PM', count: 70 },
-      { time: '4 PM', count: 85 },
-      { time: '8 PM', count: 50 },
-    ]),
-  };
-
   return (
     <div style={{ maxWidth: '750px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ color: '#c5050c', textAlign: 'center', marginBottom: '1rem' }}>
         Nick Gym Occupancy Tracker
       </h1>
 
-      {/* Quick connection verification banner */}
       <div style={{
         textAlign: 'center',
         marginBottom: '1.5rem',
@@ -82,11 +56,13 @@ export default function App() {
         API Connection Status: {apiConnected ? '🟢 Connected to FastAPI' : '🔴 Disconnected (Check uvicorn)'}
       </div>
 
-      <GraphCard
-        title="Nick — Level 1 Fitness"
-        percentage={livePercentage}
-        timeframeData={nickLevel1Data}
-      />
+      {targetLocations.map((location) => (
+        <GraphCard
+          key={location}
+          locationName={location}
+          livePercentage={liveDataMap[location]}
+        />
+      ))}
     </div>
   );
 }
