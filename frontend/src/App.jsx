@@ -1,7 +1,12 @@
+import { useState, useEffect } from 'react';
 import GraphCard from './GraphCard';
 
 export default function App() {
-  // 1. Fixed 18-hour skeleton generator
+  // 1. Declare state for API data and loading status
+  const [livePercentage, setLivePercentage] = useState(80);
+  const [apiConnected, setApiConnected] = useState(false);
+
+  // Fixed 18-hour skeleton generator
   function normalizeHourlyData(actualPoints = []) {
     const fullDayHours = [
       '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', 
@@ -18,7 +23,28 @@ export default function App() {
     });
   }
 
-  // 2. Partial data (e.g. only recorded up to 1 PM today)
+  // 2. Fetch live data from FastAPI when component mounts
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/occupancy/live')
+      .then((res) => {
+        if (!res.ok) throw new Error('API network response failed');
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Successfully fetched API data:', data);
+        setApiConnected(true);
+        
+        if (data.percentage) {
+          setLivePercentage(data.percentage);
+        }
+      })
+      .catch((error) => {
+        console.error('Error connecting to FastAPI backend:', error);
+        setApiConnected(false);
+      });
+  }, []);
+
+  // Existing mock time-series data structure
   const nickLevel1Data = {
     today: normalizeHourlyData([
       { time: '6 AM', count: 10 },
@@ -41,13 +67,24 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: '750px', margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ color: '#c5050c', textAlign: 'center', marginBottom: '2rem' }}>
+      <h1 style={{ color: '#c5050c', textAlign: 'center', marginBottom: '1rem' }}>
         Nick Gym Occupancy Tracker
       </h1>
 
+      {/* Quick connection verification banner */}
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '1.5rem',
+        fontSize: '0.9rem',
+        color: apiConnected ? '#2e7d32' : '#c5050c',
+        fontWeight: 'bold'
+      }}>
+        API Connection Status: {apiConnected ? '🟢 Connected to FastAPI' : '🔴 Disconnected (Check uvicorn)'}
+      </div>
+
       <GraphCard
         title="Nick — Level 1 Fitness"
-        percentage={80}
+        percentage={livePercentage}
         timeframeData={nickLevel1Data}
       />
     </div>
