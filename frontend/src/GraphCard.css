@@ -1,0 +1,60 @@
+.graph-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.graph-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.graph-card-header h3 {
+  margin: 0 0 0.25rem 0;
+  color: #333333;
+}
+
+.badge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.timeframe-select {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.chart-container {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.timeframe-select {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  background-color: #f8f9fa;
+  color: #c5050c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.timeframe-select option {
+  color: #333333; 
+  background-color: #ffffff;
+  padding: 0.5rem;
+}

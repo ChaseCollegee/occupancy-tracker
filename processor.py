@@ -106,7 +106,7 @@ def process_and_save():
     conn.close()
     
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"[{current_time}] Ingestion complete: {saved_count} new entries saved, {skipped_count} stale entries skipped.")
+    print(f"[{current_time}] Collection complete: {saved_count} new entries saved, {skipped_count} stale entries skipped.")
 
 
 if __name__ == "__main__":
